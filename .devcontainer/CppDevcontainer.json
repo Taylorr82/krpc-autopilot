@@ -1,0 +1,34 @@
+{
+    "name": "kRPC Dev",
+    "dockerFile": "Dockerfile",
+
+    "runArgs": [
+        "--name=krpc-dev-cpp",
+        "--env=DISPLAY",
+        "--env=QT_X11_NO_MITSHM=1",
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        "--privileged",
+        "--net=host",
+        "--cap-add=SYS_ADMIN",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+
+    "remoteUser": "krpc-dev",
+
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/krpc-dev/${localWorkspaceFolderBasename},type=bind",
+
+    "workspaceFolder": "/home/krpc-dev/${localWorkspaceFolderBasename}",
+
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ],
+
+    "extensions": [
+        "ms-vscode.cpptools",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools",
+        "ms-python.python"
+    ]
+}

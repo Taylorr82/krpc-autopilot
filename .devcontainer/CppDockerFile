@@ -1,0 +1,43 @@
+FROM debian:bullseye-slim
+ENV PROTOBUF_MAJOR_VERSION=3
+ENV PROTOBUF_MINOR_VERSION=21.1
+ENV PROTOBUF_VERSION=${PROTOBUF_MAJOR_VERSION}.${PROTOBUF_MINOR_VERSION}
+ENV PROTOBUF_ZIP=protobuf-cpp-${PROTOBUF_VERSION}.zip
+
+LABEL Name=krpctoolbox Version=0.0.1
+RUN apt-get -y update && apt-get upgrade -y && \
+    useradd -G "sudo" -s "/bin/bash" -m -U "krpc-dev" && echo "krpc-dev:krpc" | chpasswd && \
+    apt-get install --no-install-recommends -y sudo git nano build-essential clang-format cmake autoconf automake libtool curl make g++ unzip wget ca-certificates ssl-cert zlib1g-dev python3 python3-pip && \
+    # krpc project required libraries
+    apt-get --no-install-recommends -y install libasio-dev libglfw3-dev mesa-utils && \
+    apt-get clean && \
+    apt-get autoremove -y
+ENV LD_LIBRARY_PATH='/usr/lib:/usr/lib64:/usr/local/lib:/opt/protobuf:/opt/krpc'
+
+# install protobuf
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_MINOR_VERSION}/${PROTOBUF_ZIP} && \
+    unzip ${PROTOBUF_ZIP} -d /protobuf && \
+    cd /protobuf/protobuf-${PROTOBUF_VERSION} && \
+    ./configure && \
+    make -j$(nproc) && \
+    make install && \ 
+    ldconfig && \
+    cd / && \
+    rm -rf /protobuf && \
+    rm ${PROTOBUF_ZIP}
+
+# install krpc C++ library
+RUN wget https://github.com/krpc/krpc/releases/download/v0.5.1/krpc-0.5.1.zip -O krpc.zip && \
+    unzip krpc.zip -d /krpc && \
+    cd /krpc/client && \
+    unzip krpc-cpp-0.5.1.zip -d cppclient && \
+    cd cppclient/krpc-cpp-0.5.1 && \
+    cmake . -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd / && \
+    rm -rf /krpc && \
+    rm krpc.zip
+
+CMD [ "/bin/bash", "-l"]
