@@ -11,3 +11,6 @@ def getVersion():
 
 def getCurrentVessel():
     return conn.space_center.active_vessel
+
+def add_streamfunc(Callable, *args: object, **kwargs: object):
+    return conn.add_stream(Callable, args, kwargs)
